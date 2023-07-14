@@ -1,2 +1,2 @@
-﻿# Embedded_C_Atmega328p
+ ﻿# Embedded projects in C for Atmega328p
  # all projects are written bare metal in rtl
