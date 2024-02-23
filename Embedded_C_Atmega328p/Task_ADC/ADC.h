@@ -31,13 +31,9 @@ volatile uint8_t old_ADMUX_REF = 0;
 uint16_t read_adc(uint8_t port)
 {
 	if(port>7) return 0;
-	
 	ADMUX &= ~((1<<REFS1) | (1<<REFS0) | (1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0)); //clear ADMUX
-		
 	ADMUX |= (port & 0x0f); //set port. this line only manipulates first four bits
-	
 	ADMUX |= (1<<REFS0) | (0<<REFS1); //set reference to VCC (5 volt)
-	
 	if((ADMUX&(0xC0)) != old_ADMUX_REF)
 	{
 		old_ADMUX_REF = ADMUX&(0xC0);
@@ -45,13 +41,10 @@ uint16_t read_adc(uint8_t port)
 	}
 	
 	ADCSRA &= ~((1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0) | (1<<ADSC)); //clears ADCSRA
-
 	ADCSRA |= (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2); //set prescaler to 128
-	
 	ADCSRA |= (1<<ADSC); //start conversion		
-	
+
 	while((ADCSRA & (1<<ADSC)) != 0); //waits for conversion to end. ADSC is 0 when finished
-	
 	//ADCL has to be read first
 	return ADC;	 
 }
@@ -66,20 +59,18 @@ uint8_t convert_adc_value_to_8_bit(uint16_t adc_value, uint8_t max)
 	temp /= 1023;
 	temp *= max;
 	temp /= 1000;
-	
 	return (uint8_t) temp;
 }
 
 
 uint16_t to_mv(uint16_t adc_value)
 {
-		return (adc_value * ADC_RESOLUTION_M)/ 1000;
+	return (adc_value * ADC_RESOLUTION_M)/ 1000;
 }
 
 int16_t read_temp()
 {
 	ADMUX &= ~((1<<REFS1) | (1<<REFS0) | (1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0)); //clear ADMUX
-	 
 	ADMUX |= (1<<MUX3); //set port	
 	ADMUX |= (1<<REFS0) | (1<<REFS1); //set reference to internal reference voltage of 1.1V
 	
@@ -90,24 +81,17 @@ int16_t read_temp()
 	}
 	
 	ADCSRA &= ~((1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0) | (1<<ADSC)); //clears ADCSRA
-	
 	ADCSRA |= (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2); //set prescaler to 128
-	
-	
 	ADCSRA |= (1<<ADSC); //start conversion
-	
 	while((ADCSRA & (1<<ADSC)) != 0); //waits for conversion to end
-	
 	//ADCL has to be read first
 	return ((ADCL | (ADCH << 8)) - 342); //offset
 }
-
 
 void init_adc()
 {
 	PRR |= (0<<PRADC); //disable Power Reduction ADC
 	ADCSRA |= (1<<ADEN); //enable ADC	
 }
-
 
 #endif /* ADC_H_ */
