@@ -1,4 +1,3 @@
-
 /**
  * Context Switch in Assembly for bare metal Atmega328p
  * Reilly - 2022
@@ -10,11 +9,9 @@
 #define SREG         0x3f
 #define SPH          0x3e
 #define SPL          0x3d
-#define R25 25
-#define R24 24
+#define R25          25
+#define R24          24
 
-
-;
 ; This assembler routine is called as a function like
 ; void ContextSwitch(uint8_t * NextThread_sp, uint8_t ** CurrThread_sp)
 ; and performs the context switch between the passed two threads.
@@ -22,33 +19,13 @@
 
 ContextSwitch:
 
-// Passed parameters:
-//
-// r22 CurrThread_sp, lo-part Adress
-// r23 CurrThread_sp, hi-part
-//
-// r24 NextThread_sp, lo-part Value
-// r25 NextThread_sp, hi-part
-
 // Aim:
-//
 // 1. Save the current register set + SREG to the stack
 // of the thread to be suspended (CurrThread).
 //
 // 2. Switch the stacks from CurrThread to NextThread.
 //
 // 3. Restore the context of the NextThread.
-
-
-// - Data between registers can be moved. To transfer data between memory and
-//   registers, the in and out instructions must be used
-//   Examples:
-// mov r31, r23 ; moves the value of r23 to r31
-//   in r22, SPL ; moves the content of the memory location 0x3E (which
-//                      ; is defined as SPL, see register file) to r22
-// std Z+1, r23 ; 'store indirect with displacement': Stores the word
-    // st Z,   r22 ; contained in the registers r23 (hi part) and r22 (lo part)
-    // ; to the memory location pointed to by the Z register
  
 //push GPR, SR and return adress from task1
 push r0
@@ -139,10 +116,5 @@ pop r3
 pop r2
 pop r1
 pop r0
-
-//TODO - Simple switch to the next process. 2 lines. One-way, one shot only.
-//This means that after the MainThread is run, 
-//application 1, application 2, application 3, application 4, application 5 should run. 
-//Undefined what happens, next. (What happens next? :-)
 
 ret
