@@ -5,7 +5,6 @@
  *  Author: Blaki
  */ 
 
-
 #ifndef EVENTS_H_
 #define EVENTS_H_
 
@@ -63,18 +62,16 @@ uint8_t eventIsSet(uint8_t counter)
 
 void Timer(uint32_t counter_now)
 {
-	uint32_t ntime; // Derzeitige Zeit
-
-	
-		unsigned char sreg_old = SREG;
-		cli();
+	uint32_t ntime; // Current Zeit
+	unsigned char sreg_old = SREG;
+	cli(); 		// disable interrupts
 	for(int i = 0; i < 5; i++)
 	{
 		if(((TimerCounter >> i) & 1) == 1)
 		{
 			big_timer_box[i].ntime = counter_now;
 		}
-		//printf("Timercounter %i\n",TimerCounter);
+
 		if( ((TimerCounter >> i) & 1) == 1 && ((StartTimerCounter >> i) & 1) == 0)
 		{
 			big_timer_box[i].start_time = counter_now;
@@ -85,12 +82,10 @@ void Timer(uint32_t counter_now)
 	ntime = counter_now;
 	for (int i = 0; i < 5; i++)
 	{
-		if(/*(big_timer_box[i].time != 0) &&*/ eeprom_read_word(Start_time_eeprom+i) && ((TimerCounter >> i & 1 ) == 1) &&  ((ntime - big_timer_box[i].start_time) >= /*big_timer_box[i].time*/ eeprom_read_word(Start_time_eeprom+i)))
+		if(eeprom_read_word(Start_time_eeprom+i) && ((TimerCounter >> i & 1 ) == 1) &&  ((ntime - big_timer_box[i].start_time) >= eeprom_read_word(Start_time_eeprom+i)))
 		{
-			//printf("ntime = %i starttime = %i Zeitabgelaufen nach %i \n",ntime, big_timer_box[0].start_time, (ntime-big_timer_box[0].start_time));
 			timer_triggerd |= (1<<i);
-			StartTimerCounter = StartTimerCounter & (~(1<<i)); // bestimmtes bit auf 0 setzen um neuen startwert zu holen
-			
+			StartTimerCounter = StartTimerCounter & (~(1<<i)); // set bit i to 0 to get new start value
 		}
 	}
 	SREG = sreg_old;
@@ -110,7 +105,7 @@ void set_start_Timer(uint8_t timer_, uint32_t time_)
 	unsigned char sreg_old = SREG;
 	cli();
 	big_timer_box[timer_].time = time_;
-	eeprom_write_word(Start_time_eeprom+timer_,time_);			//funktiniert nicht?
+	eeprom_write_word(Start_time_eeprom+timer_,time_);
 	SREG = sreg_old;
 }
 
@@ -130,6 +125,5 @@ void cancelTimer(uint8_t timer)
 	TimerCounter = TimerCounter & ( ~ (1 << timer) );
 	SREG = sreg_old;
 }
-
 
 #endif /* EVENTS_H_ */
