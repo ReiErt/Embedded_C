@@ -2,7 +2,7 @@
  * Ab_4.c
  *
  * Created: 03.05.2022 15:51:25
- * Author : Blaki
+ * Author : Reilly
  */
 
 #define F_CPU 16000000UL
@@ -44,6 +44,7 @@ void message_output_flash(const volatile char *message);
 void Timer_software(unsigned char o, uint8_t timer);
 void test();
 
+// values in EEPROM
 volatile const char Message_default[] __attribute__((progmem)) = "Wrong input Wrong input Wrong input Wrong input Wrong input Wrong input\n";
 volatile const char Message_0[] PROGMEM = "\nSelect Timer\n1. Timer0\n2. Timer1\n3. Timer2\n4. Timer3\n5. Timer4\n";
 volatile const char Message_1_1[] PROGMEM= "\nFor Timer";
@@ -51,39 +52,34 @@ volatile const char Message_1_2[] PROGMEM= "Select Action\n1. Start Timer\n2. St
 volatile const char Message_2[] PROGMEM= "Stop time of Timer ";
 volatile const char Message_3[] PROGMEM= "\nStart time is ";
 
-
-
-
 void ichwarhier()
 {
-	char buffer[] = "\n ich war hier\n";
+	char buffer[] = "\n i was here. to debug.\n";
 	message_output(buffer);
 }
 
 void setTimer_serial(uint8_t timer);
 ISR(USART_RX_vect)
 {
-    unsigned char temp = UDR0;
+    unsigned char temp = UDR0;		// Immediately save to tmp value.
     if(temp == Xoff && flow_controll_recive == 0)
     {
-         flow_controll_recive = 1;                    // Transmitter Enable aus
+         flow_controll_recive = 1;	// Disable Transmitter
     }
     else if(temp == Xon && flow_controll_recive == 1)
     {
-         flow_controll_recive = 0;                    // Tramsmitter Enable an
+         flow_controll_recive = 0;	// Enable Tramsmitter
     }
     else
     {
-        Write_to_Buffer(temp);
-        if( (flow_controll == 0) && ( distance()  >= (BUFFER_SIZE-8) ) )        //Flow controll
+        Write_to_Buffer(temp);		// Save to ring buffer
+        if( (flow_controll == 0) && ( distance()  >= (BUFFER_SIZE-8) ) )        //Ensure we only begin reading from ring buffer when it is almost full.
         {
             USART_Transmit('$');
-            USART_Transmit(Xoff);
+            USART_Transmit(Xoff);	// send XOFF to end transmission.
             flow_controll = 1;
         }
     }
-
-    
 }
 
 
@@ -93,11 +89,6 @@ void test()
 	char number='0';
 	uint8_t timer=0;
 	sei();
-	
-    //const char meldung[]="Hier ATmega. Wer da?";
-    
-    //for(int f=0;meldung[f]!='\0';f++)
-        //USART_Transmit(meldung[f]);
 	HUD(0);
 	unsigned char temp;
     while (1)
@@ -137,13 +128,9 @@ void test()
 					HUD(0);
 				}
 			}
-
-			
 		}
     }
 }
-
-
 
 void USART_Init(){
     UBRR0H = (BAUD_CONST >> 8);
@@ -162,7 +149,7 @@ int is_Buffer_Full()
 uint8_t is_Buffer_Empty()
 {
     uint8_t temp = 0;
-    if((Head==Tail) && isFull_Flag != 1)
+    if((Head==Tail) && isFull_Flag != 1)	// if buffer's write and read head are on same location and full flag is not set, then we are empty. 
     {
         temp = 1;
     }
@@ -173,7 +160,7 @@ void Write_to_Buffer(unsigned char data)
 {
     unsigned char sreg_old = SREG;
     cli();
-    if(!(is_Buffer_Full()))                        // Wenn full kann man nichts mehr eingeben?
+    if(!(is_Buffer_Full()))		// If full, set flag. We cannot take more!
     {
         Buffer[Head] = data;
         Head = (Head+1) % (BUFFER_SIZE-1);
@@ -205,7 +192,7 @@ uint8_t USART_Transmit(unsigned char data)
         return(0);
     }
 
-    while(!(UCSR0A & (1<<UDRE0))) ;        // solange 1 in UDREn ist
+    while(!(UCSR0A & (1<<UDRE0))) ;       			// solange 1 in UDREn ist
     UDR0 = data;
     return(1);
 }
@@ -213,7 +200,7 @@ uint8_t USART_Transmit(unsigned char data)
 
 unsigned char USART_Receive()
 {
-    if(flow_controll == 1 && (distance()  <= 3) )                    //Flowcontroll
+    if(flow_controll == 1 && (distance() <= 3) ) 	//Flow control
     {
         USART_Transmit(Xon);
         flow_controll = 0;
@@ -224,8 +211,6 @@ unsigned char USART_Receive()
         return(temp);
 	}
 	return(0);
-
-    
 }
 
 uint8_t distance()
@@ -243,64 +228,33 @@ uint8_t distance()
     
 }
 
-
-
+// terminal CLI GUI
 void HUD(uint8_t hud_register)
 {
-	/*
-	const char message_default[]  = "Wrong input\n";
-	const char message_0[] = "\nSelect Timer\n1. Timer0\n2. Timer1\n2. Timer1\n3. Timer2\n4. Timer3\n5. Timer4\n";
-	const char message_1_1[] = "\nFor Timer";
-	const char message_1_2[] = "Select Action\n1. Start Timer\n2. Stop Timer\n3. Set Timer\n4. Show Start Time\n5. back\n";
-	const char message_2[] = "Stop time of Timer ";
-	const char message_3[] = "\nStart time is ";
-	*/
 	if( (hud_register >>3) == 0 )
 	{
-		//message_output(message_0);
-		/*
-		volatile char temp=1;
-		int wtf = &Message_default;
-		int temp2;
-		//for(int i = 0; pgm_read_byte(&message_0 + i) != '\0'; i++)		
-		for(int i = 0; temp!='\0'  ; i++)
-		{
-			
-			temp2 = wtf + i ;
-			temp = pgm_read_byte(temp2);
-			USART_Transmit(temp);
-			//USART_Transmit(pgm_read_byte(&Message_0+i));			// es wird +49 statt +1 gerechnet warum?
-			
-		}*/
-		//char temp = pgm_read_byte(&message_0+5);
 		message_output_flash(Message_0);
 	}
 	if( (hud_register >>3) == 1)
 	{
-		//message_output(message_1_1);
 		message_output_flash(Message_1_1);
 		USART_Transmit((hud_register & 7)+48);
 		USART_Transmit(' ');
-		//message_output(message_1_2);
 		message_output_flash(Message_1_2);
 	}
 	if( (hud_register >>3) == 2)
 	{
-		//message_output(message_2);
 		message_output_flash(Message_2);
 		USART_Transmit((hud_register & 7)+48);
 	}
 	if( (hud_register >>3) == 3)
 	{
-		//message_output(message_3);
 		message_output_flash(Message_3);
 	}
 	if( (hud_register >>3) == 31)
 	{
-		//message_output(message_default);
 		message_output_flash(Message_default);
 	}
-		
 }
 
 void message_output(const volatile char *message)
@@ -415,6 +369,4 @@ void setTimer_serial(uint8_t timer)
 	}
 	set_start_Timer(timer,number);
 	eeprom_write_word(Start_time_eeprom+timer,(uint16_t)number);
-	
 }
-
