@@ -2,7 +2,7 @@
  * Ab_3.c
  *
  * Created: 26.04.2022 14:05:13
- * Author : Blaki
+ * Author : Reilly
  */
 
 
@@ -12,7 +12,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdint.h>
-#include <stddef.h> // f¸r NULL
+#include <stddef.h> // f√ºr NULL
 #include "events.h"
 
 #define Event_50ms 0
@@ -21,7 +21,7 @@
 #define Timer_1s 1
 #define test_timer 2
 
-volatile uint8_t i = 0; //laufz‰hler f¸r LED
+volatile uint8_t i = 0; //laufz√§hler f√ºr LED
 volatile uint8_t run = 0;
 
 #include "serial.h"
@@ -30,7 +30,7 @@ volatile uint8_t run = 0;
 ISR(TIMER0_OVF_vect)
 {
     static uint32_t counter=0;
-    TCNT0 = 6;                    // bis 250 z‰hlen dann kommt ein interrupt (1 takt = 4us bei 64 pre scale| 250 takte entspricht dann 1ms)
+    TCNT0 = 6;                    // bis 250 z√§hlen dann kommt ein interrupt (1 takt = 4us bei 64 pre scale| 250 takte entspricht dann 1ms)
     counter++;
     if((counter%50)==0)            // 50 ms
     {        
@@ -128,7 +128,7 @@ void button()
 	
 	for(int counter = 0; counter < 10; counter ++)
 	{
-		touch_0 = (PIND >> PIND3) & 1;            // Pin 3 gesetzt ? / Taster 4 gedr¸ckt?
+		touch_0 = (PIND >> PIND3) & 1;            // Pin 3 gesetzt ? / Taster 4 gedr√ºckt?
 		if(touch_0 == 0 && state_0 == 1)
 		{
 			run = 0;
@@ -137,7 +137,7 @@ void button()
 		}
 		state_0 = touch_0;
 		            
-		touch_1 = (PIND >> PIND4) & 1;            // Pin 4 gesetzt ? / Taster 5 gedr¸ckt?
+		touch_1 = (PIND >> PIND4) & 1;            // Pin 4 gesetzt ? / Taster 5 gedr√ºckt?
 		if(touch_1 == 0 && state_1 == 1)
 		{
 			run = 1;
