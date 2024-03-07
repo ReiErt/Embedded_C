@@ -2,7 +2,29 @@
  * events.h
  *
  * Created: 26.04.2022 18:54:05
- *  Author: Blaki
+ *  Author: Ertman
+
+Interrupt Handling as follows..
+
+    (1) When an interrupt occurs, 
+    (2) the microcontroller completes the current instruction and 
+    (3) stores the address of the next instruction on the stack
+    It also turns off the interrupt system to prevent further interrupts while one is in progress. This is done by 
+    (4) clearing the SREG Global Interrupt Enable I-bit.
+
+
+    The (5) Interrupt flag bit is cleared for Type 1 Interrupts only (see the next page for Type definitions).
+    The execution of the ISR is performed by 
+    (6) loading the beginning address of the ISR specific for that interrupt into the program counter. The AVR processor starts running the ISR.
+    (7) Execution of the ISR continues until the return from interrupt instruction (reti) is encountered. 
+    The (8) SREG I-bit is automatically set when the reti instruction is executed (i.e., Interrupts enabled).
+    When the AVR exits from an interrupt, 
+    it will always (9) return to the interrupted program 
+    and (10) execute one more instruction before any pending interrupt is served.
+    The Status Register is not automatically stored when entering an interrupt routine, nor restored when returning from an interrupt routine. 
+    This must be handled by software.
+
+ 
  */ 
 
 
